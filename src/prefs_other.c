@@ -252,6 +252,7 @@ static void prefs_keybind_apply_clicked(GtkWidget *widget)
 		{"<Actions>/Menu/Message/Mark/Unmark",			"U"},
 		{"<Actions>/Menu/Message/Mark/MarkUnread",		"<shift>exclam"},
 		{"<Actions>/Menu/Message/Mark/MarkRead",		""},
+		{"<Actions>/Menu/Message/Mark/MarkReadToggle",		""},
 
 		{"<Actions>/Menu/Tools/AddressBook",			"<shift><control>A"},
 		{"<Actions>/Menu/Tools/Execute",			"X"},

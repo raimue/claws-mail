@@ -194,6 +194,8 @@ static void summary_mark_row_as_read	(SummaryView		*summaryview,
 					 GtkCMCTreeNode		*row);
 static void summary_mark_row_as_unread	(SummaryView		*summaryview,
 					 GtkCMCTreeNode		*row);
+static void summary_mark_row_as_read_toggle (SummaryView	*summaryview,
+					     GtkCMCTreeNode	*row);
 static void summary_delete_row		(SummaryView		*summaryview,
 					 GtkCMCTreeNode		*row);
 static void summary_unmark_row		(SummaryView		*summaryview,
@@ -705,6 +707,7 @@ SummaryView *summary_create(MainWindow *mainwin)
 	MENUITEM_ADDUI_MANAGER(mainwin->ui_manager, "/Menus/SummaryViewPopup/Mark", "Separator1", "Message/Mark/---", GTK_UI_MANAGER_SEPARATOR)
 	MENUITEM_ADDUI_MANAGER(mainwin->ui_manager, "/Menus/SummaryViewPopup/Mark", "MarkUnread", "Message/Mark/MarkUnread", GTK_UI_MANAGER_MENUITEM)
 	MENUITEM_ADDUI_MANAGER(mainwin->ui_manager, "/Menus/SummaryViewPopup/Mark", "MarkRead", "Message/Mark/MarkRead", GTK_UI_MANAGER_MENUITEM)
+	MENUITEM_ADDUI_MANAGER(mainwin->ui_manager, "/Menus/SummaryViewPopup/Mark", "MarkReadToggle", "Message/Mark/MarkReadToggle", GTK_UI_MANAGER_MENUITEM)
 	MENUITEM_ADDUI_MANAGER(mainwin->ui_manager, "/Menus/SummaryViewPopup/Mark", "Separator2", "Message/Mark/---", GTK_UI_MANAGER_SEPARATOR)
 	MENUITEM_ADDUI_MANAGER(mainwin->ui_manager, "/Menus/SummaryViewPopup/Mark", "MarkAllRead", "Message/Mark/MarkAllRead", GTK_UI_MANAGER_MENUITEM)
 	MENUITEM_ADDUI_MANAGER(mainwin->ui_manager, "/Menus/SummaryViewPopup/Mark", "Separator3", "Message/Mark/---", GTK_UI_MANAGER_SEPARATOR)
@@ -1714,7 +1717,7 @@ void summary_set_menu_sensitive(SummaryView *summaryview)
 	gboolean sensitive;
 	gint i;
 
-#define N_ENTRIES 38
+#define N_ENTRIES 39
 	static struct {
 		const gchar *entry;
 		SensitiveCondMask cond;
@@ -1752,6 +1755,7 @@ do { \
 	FILL_TABLE("Menus/SummaryViewPopup/Mark/Unmark", M_TARGET_EXIST);
 	FILL_TABLE("Menus/SummaryViewPopup/Mark/MarkUnread", M_TARGET_EXIST);
 	FILL_TABLE("Menus/SummaryViewPopup/Mark/MarkRead", M_TARGET_EXIST);
+	FILL_TABLE("Menus/SummaryViewPopup/Mark/MarkReadToggle", M_TARGET_EXIST);
 	FILL_TABLE("Menus/SummaryViewPopup/Mark/MarkAllRead", M_TARGET_EXIST);
 	FILL_TABLE("Menus/SummaryViewPopup/Mark/IgnoreThread", M_TARGET_EXIST);
 	FILL_TABLE("Menus/SummaryViewPopup/Mark/UnignoreThread", M_TARGET_EXIST);
@@ -4242,6 +4246,41 @@ void summary_mark_as_unread(SummaryView *summaryview)
 	folder_item_set_batch(summaryview->folder_item, FALSE);
 	END_LONG_OPERATION(summaryview);
 	
+	summary_status_show(summaryview);
+}
+
+static void summary_mark_row_as_read_toggle(SummaryView *summaryview,
+                                            GtkCMCTreeNode *row)
+{
+	GtkCMCTree *ctree = GTK_CMCTREE(summaryview->ctree);
+	MsgInfo *msginfo;
+
+	msginfo = gtk_cmctree_node_get_row_data(ctree, row);
+	cm_return_if_fail(msginfo);
+
+	if(MSG_IS_NEW(msginfo->flags) || MSG_IS_UNREAD(msginfo->flags)) {
+		summary_mark_row_as_read(summaryview, row);
+	} else {
+		summary_mark_row_as_unread(summaryview, row);
+	}
+}
+
+void summary_mark_as_read_toggle(SummaryView *summaryview)
+{
+	GtkCMCTree *ctree = GTK_CMCTREE(summaryview->ctree);
+	GList *cur;
+	gboolean froze = FALSE;
+
+	if (summary_is_locked(summaryview))
+		return;
+	START_LONG_OPERATION(summaryview, FALSE);
+	folder_item_set_batch(summaryview->folder_item, TRUE);
+	for (cur = GTK_CMCLIST(ctree)->selection; cur != NULL && cur->data != NULL; cur = cur->next)
+		summary_mark_row_as_read_toggle(summaryview,
+		                                GTK_CMCTREE_NODE(cur->data));
+	folder_item_set_batch(summaryview->folder_item, FALSE);
+	END_LONG_OPERATION(summaryview);
+
 	summary_status_show(summaryview);
 }
 

@@ -226,6 +226,8 @@ static void mark_as_unread_cb		(GtkAction	*action,
 				  gpointer	 data);
 static void mark_as_read_cb		(GtkAction	*action,
 				  gpointer	 data);
+static void mark_as_read_toggle_cb	(GtkAction	*action,
+				  gpointer	 data);
 static void mark_all_read_cb		(GtkAction	*action,
 				  gpointer	 data);
 static void mark_as_spam_cb		(GtkAction	*action,
@@ -693,6 +695,7 @@ static GtkActionEntry mainwin_entries[] =
 
 	{"Message/Mark/MarkUnread",		NULL, N_("Mark as unr_ead"), "<shift>exclam", NULL, G_CALLBACK(mark_as_unread_cb) },
 	{"Message/Mark/MarkRead",		NULL, N_("Mark as rea_d"), NULL, NULL, G_CALLBACK(mark_as_read_cb) },
+	{"Message/Mark/MarkReadToggle",		NULL, N_("Toggle read"), NULL, NULL, G_CALLBACK(mark_as_read_toggle_cb) },
 	/* separation */
 	{"Message/Mark/MarkAllRead",		NULL, N_("Mark all read"), NULL, NULL, G_CALLBACK(mark_all_read_cb) },
 	/* separation */
@@ -1768,6 +1771,7 @@ MainWindow *main_window_create()
 	MENUITEM_ADDUI_MANAGER(mainwin->ui_manager, "/Menu/Message/Mark", "Separator1", "Message/Mark/---", GTK_UI_MANAGER_SEPARATOR)
 	MENUITEM_ADDUI_MANAGER(mainwin->ui_manager, "/Menu/Message/Mark", "MarkUnread", "Message/Mark/MarkUnread", GTK_UI_MANAGER_MENUITEM)
 	MENUITEM_ADDUI_MANAGER(mainwin->ui_manager, "/Menu/Message/Mark", "MarkRead", "Message/Mark/MarkRead", GTK_UI_MANAGER_MENUITEM)
+	MENUITEM_ADDUI_MANAGER(mainwin->ui_manager, "/Menu/Message/Mark", "MarkReadToggle", "Message/Mark/MarkReadToggle", GTK_UI_MANAGER_MENUITEM)
 	MENUITEM_ADDUI_MANAGER(mainwin->ui_manager, "/Menu/Message/Mark", "Separator2", "Message/Mark/---", GTK_UI_MANAGER_SEPARATOR)
 	MENUITEM_ADDUI_MANAGER(mainwin->ui_manager, "/Menu/Message/Mark", "MarkAllRead", "Message/Mark/MarkAllRead", GTK_UI_MANAGER_MENUITEM)
 	MENUITEM_ADDUI_MANAGER(mainwin->ui_manager, "/Menu/Message/Mark", "Separator3", "Message/Mark/---", GTK_UI_MANAGER_SEPARATOR)
@@ -4405,6 +4409,12 @@ static void mark_as_read_cb(GtkAction *action, gpointer data)
 {
 	MainWindow *mainwin = (MainWindow *)data;
 	summary_mark_as_read(mainwin->summaryview);
+}
+
+static void mark_as_read_toggle_cb(GtkAction *action, gpointer data)
+{
+	MainWindow *mainwin = (MainWindow *)data;
+	summary_mark_as_read_toggle(mainwin->summaryview);
 }
 
 static void mark_all_read_cb(GtkAction *action, gpointer data)
